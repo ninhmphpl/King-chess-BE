@@ -20,7 +20,12 @@ public class TableService {
 
 
     public Object joinTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId) throws Exception {
-        Player player = new Player(headerAccessor.getUser().getName());
+        String username = headerAccessor.getUser().getName();
+        return joinTable(tableId, username);
+    }
+
+    public Object joinTable(Integer tableId, String username) throws TableIsFull, TableNotExist {
+        Player player = new Player(username);
         Table table = tableList.stream().filter(tables-> tables.getId().equals(tableId)).findFirst().orElse(null);
         if(table != null){
             if (table.getPlayer1() == null){
@@ -29,11 +34,17 @@ public class TableService {
                 table.setPlayer2(player);
             } else throw new TableIsFull(table);
             return tableList;
-        } throw new TableNotExist();
+        }
+        throw new TableNotExist();
     }
 
     public Object createTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId){
-        Player player = new Player(headerAccessor.getUser().getName());
+        String username = headerAccessor.getUser().getName();
+        return createTable(tableId, username);
+    }
+
+    public Object createTable(Integer tableId, String username) {
+        Player player = new Player(username);
         Table table = new Table(tableId, player, null);
         tableList.add(table);
         return tableList;
