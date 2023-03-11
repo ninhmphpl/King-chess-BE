@@ -7,21 +7,19 @@ import com.example.king.model.Table;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class TableService {
-    private List<Table> tableList;
+    private final List<Table> tableList = new ArrayList<>();
 
     public List<Table> getTableList() {
         return tableList;
     }
 
-    public void setTableList(List<Table> tableList) {
-        this.tableList = tableList;
-    }
 
-    public Table joinTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId) throws Exception {
+    public Object joinTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId) throws Exception {
         Player player = new Player(headerAccessor.getUser().getName());
         Table table = tableList.stream().filter(tables-> tables.getId().equals(tableId)).findFirst().orElse(null);
         if(table != null){
@@ -30,7 +28,30 @@ public class TableService {
             } else if (table.getPlayer2() == null){
                 table.setPlayer2(player);
             } else throw new TableIsFull(table);
-            return table;
+            return tableList;
         } throw new TableNotExist();
+    }
+
+    public Object createTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId){
+        Player player = new Player(headerAccessor.getUser().getName());
+        Table table = new Table(tableId, player, null);
+        tableList.add(table);
+        return tableList;
+    }
+
+    public Object leave(String username){
+        for (int i = 0 ; i < tableList.size() ; i ++){
+            if(tableList.get(i).getPlayer2()!= null && tableList.get(i).getPlayer2().getName().equals(username)){
+                tableList.get(i).setPlayer2(null);
+            }
+            if (tableList.get(i).getPlayer1()!= null && tableList.get(i).getPlayer1().getName().equals(username)){
+                tableList.get(i).setPlayer1(null);
+            }
+            if(tableList.get(i).getPlayer1() == null && tableList.get(i).getPlayer2() == null){
+                tableList.remove(i);
+                i--;
+            }
+        }
+        return tableList;
     }
 }

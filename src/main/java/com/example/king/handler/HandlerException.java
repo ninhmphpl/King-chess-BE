@@ -2,15 +2,11 @@ package com.example.king.handler;
 
 import com.example.king.exception.TableDisconnect;
 import com.example.king.exception.TableIsFull;
-import com.example.king.exception.TableNotExist;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Component
 public class HandlerException {
@@ -25,9 +21,8 @@ public class HandlerException {
             return new HandlerError(1, "Table is full", "", tableIsFull.getTable());
         }
         catch (Exception e){
-            e.printStackTrace();
+            return new HandlerError(0, e.getMessage(), "", null);
         }
-        return null;
     }
 
 }

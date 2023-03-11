@@ -1,7 +1,6 @@
 package com.example.king.controller.socket;
 
 import com.example.king.handler.HandlerException;
-import com.example.king.model.Player;
 import com.example.king.model.Table;
 import com.example.king.service.TableService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 
 @Controller
-public class TableController {
+public class TableSocketController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
@@ -37,9 +36,15 @@ public class TableController {
     }
 
     @MessageMapping("/table.join")
-    @SendTo("/topic/public")
+    @SendTo("/topic/table")
     public Object joinTable(@Payload Integer tableId, SimpMessageHeaderAccessor headerAccessor) {
         return handlerException.handler(()->tableService.joinTable(headerAccessor,tableId));
+    }
+
+    @MessageMapping("/table.create")
+    @SendTo("/topic/table")
+    public Object createTable(@Payload Integer tableId, SimpMessageHeaderAccessor headerAccessor) {
+        return handlerException.handler(()->tableService.createTable(headerAccessor,tableId));
     }
 
 }
