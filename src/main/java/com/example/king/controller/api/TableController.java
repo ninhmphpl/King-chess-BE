@@ -47,4 +47,10 @@ public class TableController {
         messagingTemplate.convertAndSend("/topic/table", object);
     }
 
+    @GetMapping("/{tableId}")
+    public void getTable(@PathVariable Integer tableId){
+        Object table = tableService.getTable(tableId);
+        messagingTemplate.convertAndSend("/topic/table/" + tableId, table);
+    }
+
 }

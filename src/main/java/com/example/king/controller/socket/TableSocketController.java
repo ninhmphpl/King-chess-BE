@@ -23,10 +23,10 @@ public class TableSocketController {
     @Autowired
     private HandlerException handlerException;
 
-    @MessageMapping("/chat-user")
-    public void sendReply(@Payload String sendTo, SimpMessageHeaderAccessor headerAccessor){
-        String username = headerAccessor.getUser().getName();
-        messagingTemplate.convertAndSendToUser(sendTo, "/topic/received", "Hello "+ username);
+    @MessageMapping("/table")
+    public void sendReply(@Payload Integer tableId){
+        Object table = tableService.getTable(tableId);
+        messagingTemplate.convertAndSend("/topic/table/" + tableId, table);
     }
 
     @MessageMapping("/table.display")

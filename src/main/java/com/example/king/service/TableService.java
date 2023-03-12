@@ -65,4 +65,8 @@ public class TableService {
         }
         return tableList;
     }
+
+    public Object getTable(Integer tableId){
+        return tableList.stream().filter(table -> table.getId().equals(tableId)).findFirst();
+    }
 }

@@ -3,15 +3,10 @@ package com.example.king.service;
 import com.example.king.model.Player;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-
-import java.util.ArrayList;
-import java.util.Map;
-
 public class UserInterceptor implements ChannelInterceptor {
 
     @Override
@@ -20,15 +15,7 @@ public class UserInterceptor implements ChannelInterceptor {
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String username = accessor.getFirstNativeHeader("username");
-            Object raw = message.getHeaders().get(SimpMessageHeaderAccessor.NATIVE_HEADERS);
-
-            if (raw instanceof Map) {
-                Object name = ((Map) raw).get("username");
-
-                if (name instanceof ArrayList) {
-                    accessor.setUser(new Player(((ArrayList<String>) name).get(0).toString()));
-                }
-            }
+            accessor.setUser(new Player(username));
         }
         return message;
     }

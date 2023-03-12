@@ -26,14 +26,3 @@ public class HandlerException {
     }
 
 }
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-class HandlerError{
-    private int code;
-    private String name;
-    private String description;
-    private Object object;
-
-}

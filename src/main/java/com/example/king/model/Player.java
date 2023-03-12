@@ -22,5 +22,6 @@ public class Player implements Principal {
     }
     public Player(String name){
         this.name = name;
+        this.status = Status.WAITING;
     }
 }

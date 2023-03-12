@@ -1,19 +1,27 @@
 package com.example.king.service;
 
+import com.example.king.exception.UserCantPerformAction;
 import com.example.king.model.Player;
+import com.example.king.model.Status;
 import com.example.king.model.Table;
 import com.example.king.model.Unit;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class PlayService {
-    private HashMap<Integer, Unit[][]> table;
+    private final Map<Integer, Unit[][]> tables = new HashMap<>();
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
-    public Object crateTable(Table table){
+    public void crateTable(Table table){
         Unit[][] startChess = new Unit[8][8];
+        tables.put(table.getId(), startChess);
 
         Unit kingP1 = Unit.getKing(table.getPlayer1(), true);
         Unit queenP1 = Unit.getQueen(table.getPlayer1(),true);
@@ -50,17 +58,30 @@ public class PlayService {
         startChess[7][3] = kingP2;
         startChess[7][4] = queenP2;
 
-
-
-
-        return startChess;
+        messagingTemplate.convertAndSend("/topic/play/" + table.getId(), startChess);
     }
 
-    public static void main(String[] args) {
-        PlayService a = new PlayService();
-        Unit[][] units = (Unit[][]) a.crateTable(new Table(12,new Player("ninh",null), new Player("yen", null)));
-        for(Unit[] unit : units){
-            System.out.println(Arrays.toString(unit));
+    public void ready(String username, Table table) throws UserCantPerformAction {
+        Player player1 = table.getPlayer1();
+        Player player2 = table.getPlayer2();
+
+        if(player1.getName().equals(username)){
+            setStatusPlayer(player1);
+        } else if (player2.getName().equals(username)) {
+            setStatusPlayer(player2);
+        }else throw new UserCantPerformAction();
+
+        messagingTemplate.convertAndSend("/topic/table/" + table.getId(), table);
+        if(player1.getStatus() == Status.READY && player2.getStatus() == Status.READY){
+            crateTable(table);
+        }
+    }
+
+    private static void setStatusPlayer(Player player) {
+        if(player.getStatus() == Status.WAITING){
+            player.setStatus(Status.READY);
+        }else if (player.getStatus() == Status.READY){
+            player.setStatus(Status.WAITING);
         }
     }
 }

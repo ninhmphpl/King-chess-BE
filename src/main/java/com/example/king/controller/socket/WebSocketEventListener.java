@@ -38,7 +38,6 @@ public class WebSocketEventListener {
                     (Message<?>) Objects.requireNonNull(headerAccessor.getHeader("simpConnectMessage")),
                     StompHeaderAccessor.class);
             if (stompHeaderAccessor != null) {
-
                     return Objects.requireNonNull(stompHeaderAccessor.getNativeHeader("token")).get(0);
             }else throw new Exception("Stomp header is null");
         }else throw new Exception("MessageHeaderAccessor is null");
