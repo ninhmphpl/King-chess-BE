@@ -3,8 +3,11 @@ package com.example.king.service;
 import com.example.king.exception.TableIsFull;
 import com.example.king.exception.TableNotExist;
 import com.example.king.model.Player;
+import com.example.king.model.Status;
 import com.example.king.model.Table;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +20,8 @@ public class TableService {
     public List<Table> getTableList() {
         return tableList;
     }
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
 
     public Object joinTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId) throws Exception {
@@ -39,13 +44,11 @@ public class TableService {
     }
 
     public Object createTable(SimpMessageHeaderAccessor headerAccessor, Integer tableId){
-        String username = headerAccessor.getUser().getName();
-        return createTable(tableId, username);
+        return createTable(tableId);
     }
 
-    public Object createTable(Integer tableId, String username) {
-        Player player = new Player(username);
-        Table table = new Table(tableId, player, null);
+    public Object createTable(Integer tableId) {
+        Table table = new Table(tableId, null, null);
         tableList.add(table);
         return tableList;
     }
@@ -66,7 +69,9 @@ public class TableService {
         return tableList;
     }
 
-    public Object getTable(Integer tableId){
-        return tableList.stream().filter(table -> table.getId().equals(tableId)).findFirst();
+    public Table getTable(Integer tableId){
+        Table result =  tableList.stream().filter(table -> table.getId().equals(tableId)).findFirst().orElse(null);
+        messagingTemplate.convertAndSend("/topic/table/" + tableId, result);
+        return result;
     }
 }

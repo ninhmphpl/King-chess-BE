@@ -6,6 +6,7 @@ import com.example.king.model.Status;
 import com.example.king.model.Table;
 import com.example.king.model.Unit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,16 @@ import java.util.Map;
 
 @Service
 public class PlayService {
-    private final Map<Integer, Unit[][]> tables = new HashMap<>();
+    private final Map<Integer, Unit[][]> chess = new HashMap<>();
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
+    @Autowired TableService tableService;
 
     public void crateTable(Table table){
         Unit[][] startChess = new Unit[8][8];
-        tables.put(table.getId(), startChess);
+        chess.put(table.getId(), startChess);
+        table.getPlayer1().setStatus(Status.PLAYING);
+        table.getPlayer2().setStatus(Status.PLAYING);
 
         Unit kingP1 = Unit.getKing(table.getPlayer1(), true);
         Unit queenP1 = Unit.getQueen(table.getPlayer1(),true);
@@ -60,7 +64,11 @@ public class PlayService {
 
         messagingTemplate.convertAndSend("/topic/play/" + table.getId(), startChess);
     }
-
+    public void ready(Table table, SimpMessageHeaderAccessor accessor) throws UserCantPerformAction {
+        String username = accessor.getUser().getName();
+        table = tableService.getTable(table.getId());
+        ready(username, table);
+    }
     public void ready(String username, Table table) throws UserCantPerformAction {
         Player player1 = table.getPlayer1();
         Player player2 = table.getPlayer2();
@@ -76,7 +84,19 @@ public class PlayService {
             crateTable(table);
         }
     }
+    public void getChess(Table table) throws Exception {
+        if(checkTable(table) && table.getPlayer1().getStatus() == Status.PLAYING){
+            Unit[][] chess = this.chess.get(table.getId());
+            messagingTemplate.convertAndSend("/topic/play/" + table.getId(), chess);
+        }
+    }
 
+    private boolean checkTable(Table table) throws Exception {
+        if(table == null) throw new Exception("Table is null");
+        if(table.getPlayer1() == null) throw new Exception("Player1 is null");
+        if(table.getPlayer2() == null) throw new Exception("Player2 is null");
+        return true;
+    }
     private static void setStatusPlayer(Player player) {
         if(player.getStatus() == Status.WAITING){
             player.setStatus(Status.READY);

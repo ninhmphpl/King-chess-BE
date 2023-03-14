@@ -2,6 +2,7 @@ package com.example.king.controller.socket;
 
 import com.example.king.handler.HandlerException;
 import com.example.king.model.Table;
+import com.example.king.service.PlayService;
 import com.example.king.service.TableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -19,14 +20,16 @@ public class TableSocketController {
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
     private TableService tableService;
+    @Autowired
+    private PlayService playService;
 
     @Autowired
     private HandlerException handlerException;
 
     @MessageMapping("/table")
-    public void sendReply(@Payload Integer tableId){
-        Object table = tableService.getTable(tableId);
-        messagingTemplate.convertAndSend("/topic/table/" + tableId, table);
+    public void sendReply(@Payload Integer tableId) throws Exception {
+        Table table = tableService.getTable(tableId);
+        playService.getChess(table);
     }
 
     @MessageMapping("/table.display")

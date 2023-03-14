@@ -2,10 +2,6 @@ package com.example.king.handler;
 
 import com.example.king.exception.TableDisconnect;
 import com.example.king.exception.TableIsFull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 @Component

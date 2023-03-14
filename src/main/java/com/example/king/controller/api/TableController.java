@@ -42,9 +42,10 @@ public class TableController {
         messagingTemplate.convertAndSend("/topic/table", object);
     }
     @PostMapping
-    public void createRoom(@RequestBody Table table){
-        Object object = tableService.createTable(table.getId(), table.getPlayer1().getName());
+    public Object createRoom(@RequestBody Table table){
+        Object object = tableService.createTable(table.getId());
         messagingTemplate.convertAndSend("/topic/table", object);
+        return new ResponseEntity<>(table, HttpStatus.OK);
     }
 
     @GetMapping("/{tableId}")
